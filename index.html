@@ -117,11 +117,11 @@
     <option value="yoruba">Yoruba</option>
   </select>
 
-  <label for="startDay">2) Choose your Ancestral start day</label>
-  <select id="startDay" disabled></select>
+  <label for="referenceDay">2) Select Ancestral Day for the Reference Date</label>
+  <select id="referenceDay" disabled></select>
 
-  <label for="startDate">3) Choose your Gregorian start date</label>
-  <input id="startDate" type="date" disabled>
+  <label for="referenceDate">3) Choose the Reference Gregorian Date</label>
+  <input id="referenceDate" type="date" disabled>
 
   <label for="targetDate">4) Choose the date you need to know</label>
   <input id="targetDate" type="date" disabled>
@@ -156,22 +156,22 @@
 
   function updateDays() {
     const type = document.getElementById('calendarType').value;
-    const startDaySelect = document.getElementById('startDay');
-    startDaySelect.innerHTML = "";
+    const refDaySelect = document.getElementById('referenceDay');
+    refDaySelect.innerHTML = "";
     
     if (!type) {
-      startDaySelect.disabled = true;
-      document.getElementById('startDate').disabled = true;
+      refDaySelect.disabled = true;
+      document.getElementById('referenceDate').disabled = true;
       document.getElementById('targetDate').disabled = true;
       document.getElementById('findBtn').disabled = true;
       return;
     }
 
-    startDaySelect.innerHTML = calendars[type]
+    refDaySelect.innerHTML = calendars[type]
       .map((day, i) => `<option value="${i}">${day}</option>`)
       .join('');
-    startDaySelect.disabled = false;
-    document.getElementById('startDate').disabled = false;
+    refDaySelect.disabled = false;
+    document.getElementById('referenceDate').disabled = false;
     document.getElementById('targetDate').disabled = false;
     document.getElementById('findBtn').disabled = false;
   }
@@ -179,18 +179,18 @@
   function findMarketDay() {
     const type = document.getElementById('calendarType').value;
     const marketDays = calendars[type];
-    const startDayIndex = parseInt(document.getElementById('startDay').value);
-    const startDate = parseDateAsUTC(document.getElementById('startDate').value);
+    const refDayIndex = parseInt(document.getElementById('referenceDay').value);
+    const referenceDate = parseDateAsUTC(document.getElementById('referenceDate').value);
     const targetDate = parseDateAsUTC(document.getElementById('targetDate').value);
 
-    if (!startDate || !targetDate) {
+    if (!referenceDate || !targetDate) {
       alert("Please select both dates.");
       return;
     }
 
-    const diffDays = Math.round((targetDate - startDate) / msPerDay);
+    const diffDays = Math.round((targetDate - referenceDate) / msPerDay);
     const offset = safeModulo(diffDays, 4);
-    const targetIndex = (startDayIndex + offset) % 4;
+    const targetIndex = (refDayIndex + offset) % 4;
     const resultDay = marketDays[targetIndex];
 
     const resultDiv = document.getElementById('result');
@@ -200,10 +200,10 @@
 
   function resetForm() {
     document.getElementById('calendarType').selectedIndex = 0;
-    document.getElementById('startDay').innerHTML = "";
-    document.getElementById('startDay').disabled = true;
-    document.getElementById('startDate').value = "";
-    document.getElementById('startDate').disabled = true;
+    document.getElementById('referenceDay').innerHTML = "";
+    document.getElementById('referenceDay').disabled = true;
+    document.getElementById('referenceDate').value = "";
+    document.getElementById('referenceDate').disabled = true;
     document.getElementById('targetDate').value = "";
     document.getElementById('targetDate').disabled = true;
     document.getElementById('findBtn').disabled = true;
