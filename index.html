@@ -117,10 +117,10 @@
     <option value="yoruba">Yoruba</option>
   </select>
 
-  <label for="referenceDay">2) Select Ancestral Day for the Reference Date</label>
+  <label for="referenceDay">2) Ancestral Day for the Reference Date</label>
   <select id="referenceDay" disabled></select>
 
-  <label for="referenceDate">3) Choose the Reference Gregorian Date</label>
+  <label for="referenceDate">3) Reference Gregorian Date</label>
   <input id="referenceDate" type="date" disabled>
 
   <label for="targetDate">4) Choose the date you need to know</label>
@@ -144,6 +144,12 @@
   };
   const msPerDay = 24 * 60 * 60 * 1000;
 
+  // Known reference: 12 Aug 2025
+  const referenceMap = {
+    igbo: { date: "2025-08-12", dayIndex: 1 }, // Orie
+    yoruba: { date: "2025-08-12", dayIndex: 1 } // Ọjọ́ Ọ̀rìṣà
+  };
+
   function parseDateAsUTC(dateString) {
     if (!dateString) return null;
     const [year, month, day] = dateString.split('-').map(Number);
@@ -154,25 +160,51 @@
     return ((n % m) + m) % m;
   }
 
+  function formatDateToYYYYMMDD(date) {
+    return date.toISOString().split('T')[0];
+  }
+
   function updateDays() {
     const type = document.getElementById('calendarType').value;
     const refDaySelect = document.getElementById('referenceDay');
+    const refDateInput = document.getElementById('referenceDate');
+    const targetDateInput = document.getElementById('targetDate');
     refDaySelect.innerHTML = "";
     
     if (!type) {
       refDaySelect.disabled = true;
-      document.getElementById('referenceDate').disabled = true;
-      document.getElementById('targetDate').disabled = true;
+      refDateInput.disabled = true;
+      targetDateInput.disabled = true;
       document.getElementById('findBtn').disabled = true;
       return;
     }
 
+    // Populate days for selected calendar
     refDaySelect.innerHTML = calendars[type]
       .map((day, i) => `<option value="${i}">${day}</option>`)
       .join('');
+
+    // Set today's date as default for both inputs
+    const today = new Date();
+    const todayStr = formatDateToYYYYMMDD(today);
+    refDateInput.value = todayStr;
+    targetDateInput.value = todayStr;
+
+    // Determine today's ancestral day using known reference mapping
+    const baseRef = referenceMap[type];
+    const baseRefDate = parseDateAsUTC(baseRef.date);
+    const todayUTC = parseDateAsUTC(todayStr);
+    const diffDays = Math.round((todayUTC - baseRefDate) / msPerDay);
+    const offset = safeModulo(diffDays, 4);
+    const todayDayIndex = (baseRef.dayIndex + offset) % 4;
+
+    // Auto-select correct ancestral day
+    refDaySelect.value = todayDayIndex;
+
+    // Enable inputs
     refDaySelect.disabled = false;
-    document.getElementById('referenceDate').disabled = false;
-    document.getElementById('targetDate').disabled = false;
+    refDateInput.disabled = false;
+    targetDateInput.disabled = false;
     document.getElementById('findBtn').disabled = false;
   }
 
