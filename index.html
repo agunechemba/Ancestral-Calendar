@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ancestral Calendar</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="background-decoration"></div>
+
+  <header>
+    <h1>Ancestral Calendar</h1>
+    <p class="subtitle">Discover your ancestral market days</p>
+  </header>
+
+  <main class="container">
+    <div class="form-section">
+      <div class="input-group">
+        <label for="calendarType">
+          <span class="step-number">1</span>
+          Choose calendar type
+        </label>
+        <select id="calendarType" onchange="updateDays()">
+          <option value="">-- Select Calendar Type --</option>
+          <option value="igbo">Igbo</option>
+          <option value="yoruba">Yoruba</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="referenceDay">
+          <span class="step-number">2</span>
+          Ancestral Day for the Reference Date
+        </label>
+        <select id="referenceDay" disabled></select>
+      </div>
+
+      <div class="input-group">
+        <label for="referenceDate">
+          <span class="step-number">3</span>
+          Reference Gregorian Date
+        </label>
+        <input id="referenceDate" type="date" disabled>
+      </div>
+
+      <div class="input-group">
+        <label for="targetDate">
+          <span class="step-number">4</span>
+          Choose the date you need to know
+        </label>
+        <input id="targetDate" type="date" disabled>
+      </div>
+
+      <div class="button-group">
+        <button id="findBtn" onclick="findMarketDay()" disabled>
+          <span class="btn-icon">🔍</span>
+          Find Ancestral Day
+        </button>
+
+        <button class="btn-reset" onclick="resetForm()">
+          <span class="btn-icon">🔄</span>
+          Reset
+        </button>
+      </div>
+
+      <div id="result" class="output">
+        <div class="result-icon">✨</div>
+        <div class="result-text">Your ancestral day is:</div>
+        <span class="result-day"></span>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <p>Ancestral Calendar © 2025 <a href="https://agunechemba.github.io" target="_blank">Agunechemba Ekene.</a></p>
+      <p class="footer-subtitle">All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
