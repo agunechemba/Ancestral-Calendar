@@ -1,4 +1,3 @@
-
 // Calendar data and constants
 const calendars = {
   igbo: ["Eke", "Orie", "Afor", "Nkwo"],
@@ -20,6 +19,7 @@ let elements = {};
 document.addEventListener('DOMContentLoaded', function() {
   initializeElements();
   addEventListeners();
+  initializeTheme();
 });
 
 function initializeElements() {
@@ -30,7 +30,9 @@ function initializeElements() {
     targetDate: document.getElementById('targetDate'),
     findBtn: document.getElementById('findBtn'),
     result: document.getElementById('result'),
-    resultDay: document.querySelector('.result-day')
+    resultDay: document.querySelector('.result-day'),
+    themeToggle: document.getElementById('themeToggle'),
+    themeIcon: document.querySelector('.theme-icon')
   };
 }
 
@@ -41,6 +43,61 @@ function addEventListeners() {
       this.style.animation = '';
     }
   });
+
+  // Theme toggle
+  elements.themeToggle.addEventListener('click', toggleTheme);
+}
+
+// Theme management
+function initializeTheme() {
+  // Check for saved theme preference
+  const savedTheme = localStorage.getItem('theme');
+  
+  if (savedTheme) {
+    // Use saved preference
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+  } else {
+    // Check system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = prefersDark ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    updateThemeIcon(theme);
+  }
+
+  // Listen for system theme changes
+  const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  darkModeMediaQuery.addEventListener('change', (e) => {
+    // Only change if user hasn't manually set a preference
+    if (!localStorage.getItem('theme')) {
+      const theme = e.matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      updateThemeIcon(theme);
+    }
+  });
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  updateThemeIcon(newTheme);
+  
+  // Add subtle animation feedback
+  elements.themeToggle.style.transform = 'scale(0.9)';
+  setTimeout(() => {
+    elements.themeToggle.style.transform = 'scale(1)';
+  }, 200);
+  
+  showNotification(`Switched to ${newTheme} mode`);
+}
+
+function updateThemeIcon(theme) {
+  if (elements.themeIcon) {
+    elements.themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
 }
 
 // Utility functions
@@ -59,26 +116,16 @@ function formatDateToYYYYMMDD(date) {
 }
 
 function showNotification(message, type = 'info') {
-  // Create a simple notification system
+  // Remove existing notifications
+  const existingNotifications = document.querySelectorAll('.notification');
+  existingNotifications.forEach(notification => {
+    notification.remove();
+  });
+
+  // Create notification
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
   notification.textContent = message;
-  
-  // Add notification styles
-  Object.assign(notification.style, {
-    position: 'fixed',
-    top: '20px',
-    right: '20px',
-    padding: '16px 24px',
-    borderRadius: '12px',
-    backgroundColor: type === 'error' ? '#ff6b6b' : '#667eea',
-    color: 'white',
-    fontWeight: '600',
-    boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
-    zIndex: '1000',
-    animation: 'slideInRight 0.3s ease',
-    maxWidth: '300px'
-  });
   
   document.body.appendChild(notification);
   
@@ -86,37 +133,10 @@ function showNotification(message, type = 'info') {
   setTimeout(() => {
     notification.style.animation = 'slideOutRight 0.3s ease';
     setTimeout(() => {
-      document.body.removeChild(notification);
+      notification.remove();
     }, 300);
   }, 3000);
 }
-
-// Add CSS for notification animations
-const notificationStyles = document.createElement('style');
-notificationStyles.textContent = `
-  @keyframes slideInRight {
-    from {
-      opacity: 0;
-      transform: translateX(100%);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-  
-  @keyframes slideOutRight {
-    from {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    to {
-      opacity: 0;
-      transform: translateX(100%);
-    }
-  }
-`;
-document.head.appendChild(notificationStyles);
 
 // Main functions
 function updateDays() {
@@ -237,12 +257,7 @@ function resetForm() {
   }, 300);
 }
 
-// Add fadeOut animation
-const additionalStyles = document.createElement('style');
-additionalStyles.textContent = `
-  @keyframes fadeOut {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(-20px); }
-  }
-`;
-document.head.appendChild(additionalStyles);
+// Expose functions to global scope for HTML onclick attributes
+window.updateDays = updateDays;
+window.findMarketDay = findMarketDay;
+window.resetForm = resetForm;
